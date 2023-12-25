@@ -3,9 +3,13 @@ module github.com/kgretzky/evilginx2
 go 1.18
 
 require (
+    // 管理HTTPS证书，自动申请
 	github.com/caddyserver/certmagic v0.16.1
+
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
+
 	github.com/elazarl/goproxy v0.0.0-20220529153421-8ea89ba92021
+
 	github.com/fatih/color v1.13.0
 	github.com/go-acme/lego/v3 v3.1.0
 	github.com/gorilla/mux v1.7.3
