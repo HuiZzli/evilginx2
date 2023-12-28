@@ -42,8 +42,8 @@ func showAd() {
 }
 
 func main() {
-	flag.Parse()
 
+	flag.Parse()
 	if *version_flag == true {
 		log.Info("version: %s", core.VERSION)
 		return
@@ -53,6 +53,7 @@ func main() {
 	exe_dir := filepath.Dir(exe_path)
 
 	core.Banner()
+
 	showAd()
 
 	if *phishlets_dir == "" {
@@ -65,6 +66,7 @@ func main() {
 			}
 		}
 	}
+
 	if *redirectors_dir == "" {
 		*redirectors_dir = joinPath(exe_dir, "./redirectors")
 		if _, err := os.Stat(*redirectors_dir); os.IsNotExist(err) {
@@ -73,11 +75,14 @@ func main() {
 				*redirectors_dir = joinPath(exe_dir, "./redirectors")
 			}
 		}
+
 	}
+
 	if _, err := os.Stat(*phishlets_dir); os.IsNotExist(err) {
 		log.Fatal("provided phishlets directory path does not exist: %s", *phishlets_dir)
 		return
 	}
+
 	if _, err := os.Stat(*redirectors_dir); os.IsNotExist(err) {
 		os.MkdirAll(*redirectors_dir, os.FileMode(0700))
 	}
